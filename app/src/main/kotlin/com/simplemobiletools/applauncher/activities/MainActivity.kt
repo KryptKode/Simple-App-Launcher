@@ -22,6 +22,7 @@ import com.simplemobiletools.commons.models.FAQItem
 import com.simplemobiletools.commons.models.Release
 import com.simplemobiletools.commons.views.MyGridLayoutManager
 import com.simplemobiletools.commons.views.MyRecyclerView
+import com.simplemobiletools.commons.views.cab.ActionModeItem
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
 
@@ -44,6 +45,7 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         storeStateVariables()
         setupGridLayoutManager()
 
+        var visible = true
         fab.setOnClickListener {
             if (allLaunchers != null) {
                 val shownLaunchers = (launchers_grid.adapter as LaunchersAdapter).launchers
@@ -51,7 +53,64 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
                     setupLaunchers()
                 }
             }
+            visible = !visible
+            action_mode.updateItem(
+                ActionModeItem(
+                    id = R.id.cab_change_order,
+                    title = getString(R.string.change_order),
+                    icon = R.drawable.ic_drag_handle_vector,
+                    showAsAction = true,
+                    isVisible = visible
+                )
+            )
         }
+
+        action_mode.setup(
+            listOf(
+                ActionModeItem(
+                    id = R.id.cab_change_order,
+                    title = getString(R.string.change_order),
+                    icon = R.drawable.ic_drag_handle_vector,
+                    showAsAction = true,
+                ),
+                ActionModeItem(
+                    id = R.id.cab_edit,
+                    title = getString(R.string.rename),
+                    icon = R.drawable.ic_rename_vector,
+                    showAsAction = true,
+                ),
+                ActionModeItem(
+                    id = R.id.cab_remove,
+                    title = getString(R.string.remove),
+                    icon = R.drawable.ic_minus_circle_vector,
+                    showAsAction = true,
+                ),
+                ActionModeItem(
+                    id = R.id.cab_delete,
+                    title = getString(R.string.delete),
+                    icon = R.drawable.ic_delete_vector,
+                    showAsAction = true,
+                ),
+                ActionModeItem(
+                    id = R.id.cab_edit,
+                    title = getString(R.string.edit_with),
+                    icon = R.drawable.ic_edit_vector,
+                    showAsAction = true,
+                ),
+                ActionModeItem(
+                    id = R.id.cab_copy_number,
+                    title = getString(R.string.copy),
+                    icon = R.drawable.ic_copy_vector,
+                    showAsAction = true,
+                ),
+                ActionModeItem(
+                    id = R.id.cab_edit,
+                    title = getString(R.string.edit_with),
+                    icon = R.drawable.ic_edit_vector,
+                    showAsAction = true,
+                ),
+            )
+        )
     }
 
     override fun onResume() {
@@ -130,24 +189,27 @@ class MainActivity : SimpleActivity(), RefreshRecyclerViewListener {
         AppLauncher.sorting = config.sorting
         launchers.sort()
 
+        var actionModeVisible = false
         LaunchersAdapter(this, launchers, this, launchers_grid, launchers_fastscroller) {
-            val launchIntent = packageManager.getLaunchIntentForPackage((it as AppLauncher).packageName)
-            if (launchIntent != null) {
-                try {
-                    startActivity(launchIntent)
-                    if (config.closeApp) {
-                        finish()
-                    }
-                } catch (e: Exception) {
-                    showErrorToast(e)
-                }
-            } else {
-                try {
-                    launchViewIntent("market://details?id=${it.packageName}")
-                } catch (ignored: Exception) {
-                    launchViewIntent("https://play.google.com/store/apps/details?id=${it.packageName}")
-                }
-            }
+            actionModeVisible = !actionModeVisible
+            action_mode.beVisibleIf(actionModeVisible)
+//            val launchIntent = packageManager.getLaunchIntentForPackage((it as AppLauncher).packageName)
+//            if (launchIntent != null) {
+//                try {
+//                    startActivity(launchIntent)
+//                    if (config.closeApp) {
+//                        finish()
+//                    }
+//                } catch (e: Exception) {
+//                    showErrorToast(e)
+//                }
+//            } else {
+//                try {
+//                    launchViewIntent("market://details?id=${it.packageName}")
+//                } catch (ignored: Exception) {
+//                    launchViewIntent("https://play.google.com/store/apps/details?id=${it.packageName}")
+//                }
+//            }
         }.apply {
             setupZoomListener(zoomListener)
             launchers_grid.adapter = this
